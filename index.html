@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Inspection</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div class="header-brand">
+          <h2 class="company-name">Oliver Mc Inroy & Co.</h2>
+          <p class="eyebrow">Manufacturing Quality Check</p>
+        </div>
+        <nav class="header-nav">
+          <button id="btn-new-inspection" class="nav-btn active" type="button">New</button>
+          <button id="btn-view-history" class="nav-btn" type="button">History</button>
+        </nav>
+      </header>
+
+      <section class="inspection-panel" id="entry-screen" aria-labelledby="page-title">
+        <div class="panel-header">
+          <h1 id="page-title">Product Inspection</h1>
+        </div>
+
+        <form class="inspection-form" id="inspection-form">
+          <div class="field-group">
+            <label for="product-name">Product name</label>
+            <input id="product-name" name="productName" type="text" placeholder="Enter product name" autocomplete="off" required />
+          </div>
+
+          <div class="field-group">
+            <label for="product-number">Product number</label>
+            <input id="product-number" name="productNumber" type="text" placeholder="Enter product number" autocomplete="off" autocapitalize="characters" required />
+          </div>
+
+          <div class="field-group">
+            <label for="inspector-name">Inspector name</label>
+            <input id="inspector-name" name="inspectorName" type="text" placeholder="Enter inspector name" autocomplete="name" required />
+          </div>
+
+          <div class="time-grid" aria-label="Automatic date and time">
+            <div class="field-group">
+              <label for="inspection-date">Date</label>
+              <input id="inspection-date" name="inspectionDate" type="text" readonly />
+            </div>
+            <div class="field-group">
+              <label for="inspection-time">Timestamp</label>
+              <input id="inspection-time" name="inspectionTime" type="text" readonly />
+            </div>
+          </div>
+          <input id="inspection-iso" name="inspectionIsoTimestamp" type="hidden" />
+        </form>
+        <p class="status-message" id="status-message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="inspection-panel checklist-screen" id="checklist-screen" aria-labelledby="checklist-title">
+        <div class="panel-header">
+          <p class="eyebrow">Final Verification</p>
+          <h1 id="checklist-title">Checklist</h1>
+          <p class="inspection-summary" id="inspection-summary"></p>
+        </div>
+
+        <form class="checklist-form" id="checklist-form">
+          <!-- Dynamically generated checklist rows with remark options -->
+        </form>
+        <p class="status-message" id="checklist-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="inspection-panel photo-screen" id="photo-screen" aria-labelledby="photo-title">
+        <div class="panel-header">
+          <p class="eyebrow">In-House Test</p>
+          <h1 id="photo-title">Photo Evidence</h1>
+          <p class="inspection-summary">Capture and attach images for each test heading.</p>
+        </div>
+        <div class="photo-groups" id="photo-groups"></div>
+        
+        <div class="signature-section">
+          <h2 class="section-subtitle">Inspector Signature</h2>
+          <p class="section-desc">Sign in the box below to authorize this quality check.</p>
+          <div class="signature-pad-wrapper">
+            <canvas id="signature-canvas" width="460" height="150"></canvas>
+            <div class="signature-actions">
+              <button class="secondary-button" id="clear-signature" type="button">Clear Signature</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="primary-button" id="finish-inspection" type="button">Finish inspection</button>
+        </div>
+        <p class="status-message" id="photo-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="inspection-panel history-screen" id="history-screen" aria-labelledby="history-title" style="display: none;">
+        <div class="panel-header">
+          <p class="eyebrow">Records Log</p>
+          <h1 id="history-title">Inspection History</h1>
+          <p class="inspection-summary">Review previous quality checks stored on this device.</p>
+        </div>
+        <div class="history-list" id="history-list"></div>
+      </section>
+    </main>
+
+    <dialog class="camera-dialog" id="camera-dialog">
+      <div class="camera-shell">
+        <button class="camera-close-icon" id="camera-cancel" type="button" aria-label="Close camera">x</button>
+        <video id="camera-preview" autoplay playsinline muted></video>
+        <canvas id="camera-canvas" hidden></canvas>
+        <div class="camera-actions">
+          <button class="camera-capture-icon" id="camera-capture" type="button" aria-label="Capture image">
+            <span class="camera-icon-lens"></span>
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="image-viewer-dialog" id="image-viewer-dialog">
+      <div class="image-viewer-shell">
+        <button class="viewer-close" id="viewer-close" type="button" aria-label="Close image viewer">x</button>
+        <div class="viewer-stage"><img id="viewer-image" alt="Inspection image preview" /></div>
+        <div class="viewer-actions">
+          <button class="secondary-button" id="viewer-zoom-out" type="button">Zoom -</button>
+          <button class="secondary-button" id="viewer-reset" type="button">Reset</button>
+          <button class="primary-button" id="viewer-zoom-in" type="button">Zoom +</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="annotation-dialog" id="annotation-dialog">
+      <div class="annotation-shell">
+        <button class="annotation-close-btn" id="annotation-close" type="button" aria-label="Close editor">x</button>
+        <h3 class="annotation-title">Annotate Defect</h3>
+        <div class="annotation-body">
+          <div class="canvas-container">
+            <canvas id="annotation-canvas"></canvas>
+          </div>
+        </div>
+        <footer class="annotation-footer">
+          <div class="brush-controls">
+            <div class="color-picker" aria-label="Select brush color">
+              <button type="button" class="brush-color-btn active" data-color="#e74c3c" style="background-color: #e74c3c;" title="Red - Defect"></button>
+              <button type="button" class="brush-color-btn" data-color="#f1c40f" style="background-color: #f1c40f;" title="Yellow - Warning"></button>
+              <button type="button" class="brush-color-btn" data-color="#2ecc71" style="background-color: #2ecc71;" title="Green - OK"></button>
+            </div>
+            <div class="brush-size-group">
+              <label for="brush-size">Size:</label>
+              <input type="range" id="brush-size" min="2" max="20" value="6" />
+            </div>
+          </div>
+          <div class="annotation-actions">
+            <button class="secondary-button" id="annotation-clear" type="button">Reset</button>
+            <button class="primary-button" id="annotation-save" type="button">Save Annotation</button>
+          </div>
+        </footer>
+      </div>
+    </dialog>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+  </html>
