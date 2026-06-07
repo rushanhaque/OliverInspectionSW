@@ -5,7 +5,10 @@ const dateInput = document.querySelector("#inspection-date");
 const timeInput = document.querySelector("#inspection-time");
 const isoInput = document.querySelector("#inspection-iso");
 const productNumberInput = document.querySelector("#product-number");
+<<<<<<< HEAD
 const editTimeBtn = document.querySelector("#edit-time-btn");
+=======
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
 const statusMessage = document.querySelector("#status-message");
 const inspectionSummary = document.querySelector("#inspection-summary");
 const checklistStatus = document.querySelector("#checklist-status");
@@ -46,6 +49,7 @@ const clearSignatureButton = document.querySelector("#clear-signature");
 const historyList = document.querySelector("#history-list");
 
 const photoHeadings = [
+<<<<<<< HEAD
   "Carton Drop + packagin pictures",
   "Product Compare with counter sample",
   "Product labels",
@@ -62,6 +66,27 @@ const CHECKLIST_ITEMS = [
   { key: "productFunction", label: "Product function as intended" },
   { key: "productMaterials", label: "Product materials" },
   { key: "assemblyInstructionsAvailable", label: "Assembly Instructions Available" },
+=======
+  "Carton Drop Test Tip Over Test",
+  "Earth Continuity Hi-Pot Test Assembly Test Functional Test",
+  "Functional Test Moisture Content Test Approval Sample",
+  "Top/Shipment Sample Inner Packaging Sample Outer Packaging Sample",
+  "Product compare with cs and found ok. Production compare with cs and found ok.",
+  "Master carton marking Ul marking and assembly instructions",
+];
+const CHECKLIST_ITEMS = [
+  { key: "finalVerification", label: "Final Verification" },
+  { key: "assemblyInstructionsAvailable", label: "Assembly Instructions Available" },
+  { key: "cartonDimensions", label: "Carton Dimensions" },
+  { key: "cartonLabeling", label: "Carton Labeling" },
+  { key: "packaging", label: "Packaging" },
+  { key: "productDimensions", label: "Product Dimensions" },
+  { key: "productFunction", label: "Product Function As Intended" },
+  { key: "productHangTags", label: "Product Hang Tags, Bar Code, Price Labels, etc." },
+  { key: "productMaterials", label: "Product Materials" },
+  { key: "warningLabels", label: "Warning / Other Labels" },
+  { key: "factoryFinalInspection", label: "The factory performed a 100% internal Final inspection." },
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
 ];
 
 const photoStore = new Map();
@@ -70,6 +95,7 @@ let currentCameraStream = null;
 let isOpeningCamera = false;
 let viewerScale = 1;
 
+<<<<<<< HEAD
 let isCustomTime = false;
 let timestampInterval = null;
 
@@ -105,6 +131,19 @@ editTimeBtn.addEventListener("click", () => {
 
 dateInput.addEventListener("change", () => { isCustomTime = true; });
 timeInput.addEventListener("change", () => { isCustomTime = true; });
+=======
+const dateFormatter = new Intl.DateTimeFormat(undefined, { day: "2-digit", month: "short", year: "numeric" });
+const timeFormatter = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+function updateTimestamp() {
+  const now = new Date();
+  dateInput.value = dateFormatter.format(now);
+  timeInput.value = timeFormatter.format(now);
+  isoInput.value = now.toISOString();
+}
+updateTimestamp();
+setInterval(updateTimestamp, 1000);
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
 
 productNumberInput.addEventListener("input", () => {
   productNumberInput.value = productNumberInput.value.toUpperCase();
@@ -134,8 +173,13 @@ function buildChecklist() {
   checklistForm.innerHTML = CHECKLIST_ITEMS.map((item) => `
     <div class="check-item-container">
       <label class="check-row">
+<<<<<<< HEAD
         <span>${item.label}</span>
         <input type="checkbox" name="${item.key}" />
+=======
+        <input type="checkbox" name="${item.key}" />
+        <span>${item.label}</span>
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
       </label>
       <div class="remark-container">
         <input type="text" class="remark-input" data-key="${item.key}" placeholder="Add remark (note)..." autocomplete="off" />
@@ -150,6 +194,7 @@ function buildPhotoGroups() {
       <article class="photo-group">
         <h2 class="photo-heading">${heading}</h2>
         <div class="photo-controls">
+<<<<<<< HEAD
           <div class="photo-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button class="secondary-button photo-add" data-photo-trigger="${index}" type="button" style="flex: 1; min-width: 110px; min-height: 44px;">Camera</button>
             <label class="secondary-button photo-upload" style="flex: 1; min-width: 110px; min-height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; gap: 6px; font-weight: 700;">
@@ -157,6 +202,9 @@ function buildPhotoGroups() {
               <input type="file" accept="image/*" multiple data-photo-upload="${index}" style="display: none;" />
             </label>
           </div>
+=======
+          <button class="secondary-button photo-add" data-photo-trigger="${index}" type="button">Add pictures</button>
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
           <div class="photo-list" data-photo-list="${index}"></div>
         </div>
       </article>
@@ -178,6 +226,7 @@ function renderPhotoList(groupId) {
   `).join("");
 }
 
+<<<<<<< HEAD
 photoGroups.addEventListener("change", (event) => {
   const uploadInput = event.target.closest("[data-photo-upload]");
   if (uploadInput && uploadInput.files && uploadInput.files.length > 0) {
@@ -196,6 +245,8 @@ photoGroups.addEventListener("change", (event) => {
   }
 });
 
+=======
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
 photoGroups.addEventListener("click", (event) => {
   const deleteBtn = event.target.closest(".photo-delete-btn");
   if (deleteBtn) {
@@ -462,11 +513,14 @@ function collectInspectionData() {
     productName: String(fd.get("productName") || ""),
     productNumber: String(fd.get("productNumber") || ""),
     inspectorName: String(fd.get("inspectorName") || ""),
+<<<<<<< HEAD
     buyerName: String(fd.get("buyerName") || ""),
     poNumber: String(fd.get("poNumber") || ""),
     inspectionType: String(fd.get("inspectionType") || ""),
     inspectionResult: String(fd.get("inspectionResult") || ""),
     aql: String(fd.get("aql") || "2.5"),
+=======
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
     date: dateInput.value,
     timestamp: timeInput.value,
     checklist: CHECKLIST_ITEMS.map((item) => ({
@@ -486,7 +540,11 @@ function ensurePage(doc, y, h) {
 function resetWorkflow() {
   form.reset();
   checklistForm.reset();
+<<<<<<< HEAD
   startTimestampInterval();
+=======
+  updateTimestamp();
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
   statusMessage.textContent = "";
   checklistStatus.textContent = "";
   photoStatus.textContent = "";
@@ -505,10 +563,17 @@ function exportInspectionPdf(historicalData = null) {
   }
   const report = historicalData || collectInspectionData();
   const brand = {
+<<<<<<< HEAD
     companyName: "Oliver McInroy & Co.",
     reportTitle: "Final Quality Inspection Report",
     inspectorDept: "Quality Assurance Division",
     address: "Prem Nagar Industrial Area, Kanth Road, Moradabad, UP-244001, India",
+=======
+    companyName: "Oliver Mc Inroy & Co.",
+    reportTitle: "Final Quality Inspection Report",
+    inspectorDept: "Quality Assurance Division",
+    address: "Unit 12, Industrial Estate, Bengaluru, India",
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
     logoMonogram: "OM",
   };
 
@@ -519,6 +584,7 @@ function exportInspectionPdf(historicalData = null) {
   const width = right - left;
   let y = 14;
 
+<<<<<<< HEAD
   doc.setFillColor(55, 65, 81); doc.rect(0, 0, 210, 34, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.text(brand.companyName, left, 16);
@@ -544,6 +610,29 @@ function exportInspectionPdf(historicalData = null) {
 
   y += 57;
   doc.setFont("arial", "bold"); doc.setFontSize(12); doc.text("Checklist Compliance", left, y); y += 5;
+=======
+  doc.setFillColor(123, 93, 74); doc.rect(0, 0, 210, 34, "F");
+  doc.setFillColor(155, 115, 93); doc.circle(22, 17, 10, "F");
+  doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text(brand.logoMonogram, 22, 19, { align: "center" });
+  doc.setFontSize(17); doc.text(brand.companyName, 38, 15);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.text(brand.inspectorDept, 38, 21); doc.text(brand.address, 38, 27);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text(brand.reportTitle, 196, 15, { align: "right" });
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.text(`Generated: ${new Date().toLocaleString()}`, 196, 21, { align: "right" });
+
+  y = 42;
+  doc.setTextColor(45, 37, 33); doc.setDrawColor(221, 210, 202); doc.setFillColor(251, 247, 243);
+  doc.roundedRect(left, y, width, 38, 2, 2, "FD");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text("Inspection Snapshot", left + 4, y + 7);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10.5);
+  doc.text(`Product Name: ${report.productName || ""}`, left + 4, y + 14);
+  doc.text(`Product Number: ${report.productNumber || ""}`, left + 100, y + 14);
+  doc.text(`Inspector Name: ${report.inspectorName || ""}`, left + 4, y + 21);
+  doc.text(`Date: ${report.date || ""}`, left + 100, y + 21);
+  doc.text(`Timestamp: ${report.timestamp || ""}`, left + 4, y + 28);
+
+  y += 46;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text("Checklist Compliance", left, y); y += 5;
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
   for (const item of report.checklist) {
     const hasRemark = !!item.remark;
     const boxHeight = hasRemark ? 14 : 8;
@@ -551,12 +640,20 @@ function exportInspectionPdf(historicalData = null) {
     const pass = item.checked;
     doc.setFillColor(pass ? 225 : 245, pass ? 241 : 245, pass ? 229 : 245);
     doc.roundedRect(left, y, width, boxHeight, 1.5, 1.5, "F");
+<<<<<<< HEAD
     doc.setTextColor(31, 41, 55); doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+=======
+    doc.setTextColor(45, 37, 33); doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
     doc.text(doc.splitTextToSize(item.label, 160)[0], left + 4, y + 5.2);
     doc.setFont("helvetica", "bold"); doc.setTextColor(pass ? 52 : 120, pass ? 102 : 120, pass ? 66 : 120);
     doc.text(pass ? "PASS" : "N/A", right - 4, y + 5.2, { align: "right" });
     if (hasRemark) {
+<<<<<<< HEAD
       doc.setTextColor(75, 85, 99); doc.setFont("helvetica", "italic"); doc.setFontSize(9);
+=======
+      doc.setTextColor(100, 85, 75); doc.setFont("helvetica", "italic"); doc.setFontSize(9);
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
       doc.text(`Remark: ${item.remark}`, left + 8, y + 10.5);
     }
     y += boxHeight + 2;
@@ -564,11 +661,19 @@ function exportInspectionPdf(historicalData = null) {
 
   y += 14;
   y = ensurePage(doc, y, 12);
+<<<<<<< HEAD
   doc.setTextColor(31, 41, 55); doc.setFont("arial", "bold"); doc.setFontSize(12); doc.text("Visual Evidence", left, y); y += 6;
   
   if (historicalData) {
     y = ensurePage(doc, y, 12);
     doc.setTextColor(75, 85, 99);
+=======
+  doc.setTextColor(45, 37, 33); doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text("Visual Evidence", left, y); y += 6;
+  
+  if (historicalData) {
+    y = ensurePage(doc, y, 12);
+    doc.setTextColor(118, 102, 93);
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
     doc.setFont("helvetica", "italic");
     doc.text("Note: Photo attachments are not stored locally in history to save space.", left + 3, y);
     y += 12;
@@ -577,16 +682,28 @@ function exportInspectionPdf(historicalData = null) {
       const heading = photoHeadings[i];
       const photos = photoStore.get(i) || [];
       y = ensurePage(doc, y, 18);
+<<<<<<< HEAD
       doc.setFillColor(243, 244, 246); doc.roundedRect(left, y, width, 8, 1.5, 1.5, "F");
       doc.setFont("arial", "bold"); doc.setFontSize(10.2); doc.setTextColor(31, 41, 55);
       doc.text(doc.splitTextToSize(heading, 176), left + 3, y + 5.2);
       y += 9;
       if (!photos.length) { y = ensurePage(doc, y, 8); doc.setTextColor(75, 85, 99); doc.text("No photos attached.", left + 3, y + 4); y += 11; continue; }
+=======
+      doc.setFillColor(245, 239, 234); doc.roundedRect(left, y, width, 8, 1.5, 1.5, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10.2); doc.setTextColor(62, 48, 39);
+      doc.text(doc.splitTextToSize(heading, 176), left + 3, y + 5.2);
+      y += 9;
+      if (!photos.length) { y = ensurePage(doc, y, 8); doc.setTextColor(118, 102, 93); doc.text("No photos attached.", left + 3, y + 4); y += 11; continue; }
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
       const w = 42; const h = 32; const gap = 3; let col = 0;
       for (const photo of photos) {
         if (col === 0) y = ensurePage(doc, y, h + 4);
         const x = left + col * (w + gap);
+<<<<<<< HEAD
         doc.setDrawColor(209, 213, 219); doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
+=======
+        doc.setDrawColor(210, 196, 186); doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
         doc.addImage(photo, "JPEG", x, y, w, h);
         col += 1;
         if (col >= 4) { col = 0; y += h + 4; }
@@ -598,8 +715,13 @@ function exportInspectionPdf(historicalData = null) {
   // Add signature section at the end of PDF
   y += 4;
   y = ensurePage(doc, y, 40);
+<<<<<<< HEAD
   doc.setTextColor(31, 41, 55); doc.setFont("arial", "bold"); doc.setFontSize(12); doc.text("Authorized Inspector Signature", left, y); y += 6;
   doc.setDrawColor(209, 213, 219); doc.roundedRect(left, y, 60, 25, 1.2, 1.2, "S");
+=======
+  doc.setTextColor(45, 37, 33); doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text("Authorized Inspector Signature", left, y); y += 6;
+  doc.setDrawColor(210, 196, 186); doc.roundedRect(left, y, 60, 25, 1.2, 1.2, "S");
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
   
   const sigData = historicalData ? historicalData.signature : (isSigEmpty ? null : signatureCanvas.toDataURL("image/png"));
   if (sigData) {
@@ -609,15 +731,27 @@ function exportInspectionPdf(historicalData = null) {
       console.error("Failed to add signature image:", e);
     }
   } else {
+<<<<<<< HEAD
     // Leave blank for manual signature
+=======
+    doc.setTextColor(150, 150, 150);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.text("No signature captured", left + 5, y + 13);
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
   }
   y += 30;
 
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p += 1) {
     doc.setPage(p);
+<<<<<<< HEAD
     doc.setDrawColor(229, 231, 235); doc.line(14, 287, 196, 287);
     doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(107, 114, 128);
+=======
+    doc.setDrawColor(230, 221, 214); doc.line(14, 287, 196, 287);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(120, 108, 100);
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
     doc.text(`${brand.companyName}  |  Confidential QA Report`, 14, 292);
     doc.text(`Page ${p} of ${pages}`, 196, 292, { align: "right" });
   }
@@ -634,11 +768,14 @@ finishInspectionButton.addEventListener("click", () => {
     productName: report.productName,
     productNumber: report.productNumber,
     inspectorName: report.inspectorName,
+<<<<<<< HEAD
     buyerName: report.buyerName,
     poNumber: report.poNumber,
     inspectionType: report.inspectionType,
     inspectionResult: report.inspectionResult,
     aql: report.aql,
+=======
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
     date: report.date,
     timestamp: report.timestamp,
     checklist: report.checklist,
@@ -659,7 +796,11 @@ let isSigEmpty = true;
 const sigCtx = signatureCanvas.getContext("2d");
 
 function initSignaturePad() {
+<<<<<<< HEAD
   sigCtx.strokeStyle = "#333333";
+=======
+  sigCtx.strokeStyle = "#2d2521";
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
   sigCtx.lineWidth = 2.5;
   sigCtx.lineCap = "round";
   sigCtx.lineJoin = "round";
@@ -796,8 +937,13 @@ function renderHistory() {
     card.innerHTML = `
       <div class="history-card-header">
         <div>
+<<<<<<< HEAD
           <h3 class="history-card-title">${escapeHtml(record.productName || "Unnamed Product")} ${record.inspectionType ? `[${escapeHtml(record.inspectionType)}]` : ""}</h3>
           <p class="history-card-subtitle">Result: <strong>${escapeHtml(record.inspectionResult || "N/A")}</strong> | AQL: ${escapeHtml(record.aql || "2.5")} | Inspector: ${escapeHtml(record.inspectorName || "N/A")}</p>
+=======
+          <h3 class="history-card-title">${escapeHtml(record.productName || "Unnamed Product")}</h3>
+          <p class="history-card-subtitle">Number: ${escapeHtml(record.productNumber || "N/A")} | Inspector: ${escapeHtml(record.inspectorName || "N/A")}</p>
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
         </div>
         <div class="history-card-meta">
           <div>${record.date}</div>
@@ -807,8 +953,11 @@ function renderHistory() {
       <div class="history-card-details">
         <div class="history-detail-item">Compliance: <span>${passedCount}/${totalCount} (${passRate}%) Passed</span></div>
         <div class="history-detail-item">Signature: <span>${record.signature ? "Signed" : "None"}</span></div>
+<<<<<<< HEAD
         <div class="history-detail-item">Buyer: <span>${escapeHtml(record.buyerName || "N/A")}</span></div>
         <div class="history-detail-item">PO No.: <span>${escapeHtml(record.poNumber || "N/A")}</span></div>
+=======
+>>>>>>> 1189496f8c92fd56bdfc2e8d0f026fcab4dc13c8
       </div>
       <div class="history-card-actions">
         <button class="secondary-button view-pdf-btn" data-id="${record.id}" type="button">Download PDF</button>
