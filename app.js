@@ -483,6 +483,28 @@ function ensurePage(doc, y, h) {
   return 16;
 }
 
+function compressImage(dataUrl, maxDim, quality) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth;
+      let h = img.naturalHeight;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+        else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+      }
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
 function resetWorkflow() {
   form.reset();
   checklistForm.reset();
@@ -498,7 +520,7 @@ function resetWorkflow() {
   clearSignature();
 }
 
-function exportInspectionPdf(historicalData = null) {
+async function exportInspectionPdf(historicalData = null) {
   if (!window.jspdf || !window.jspdf.jsPDF) {
     photoStatus.textContent = "PDF library not loaded.";
     return;
@@ -587,7 +609,8 @@ function exportInspectionPdf(historicalData = null) {
         if (col === 0) y = ensurePage(doc, y, h + 4);
         const x = left + col * (w + gap);
         doc.setDrawColor(209, 213, 219); doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
-        doc.addImage(photo, "JPEG", x, y, w, h);
+        const compressed = await compressImage(photo, 800, 0.5);
+        doc.addImage(compressed, "JPEG", x, y, w, h);
         col += 1;
         if (col >= 4) { col = 0; y += h + 4; }
       }
@@ -601,7 +624,8 @@ function exportInspectionPdf(historicalData = null) {
   doc.setTextColor(31, 41, 55); doc.setFont("arial", "bold"); doc.setFontSize(12); doc.text("Authorized Inspector Signature", left, y); y += 6;
   doc.setDrawColor(209, 213, 219); doc.roundedRect(left, y, 60, 25, 1.2, 1.2, "S");
   
-  const sigData = historicalData ? historicalData.signature : (isSigEmpty ? null : signatureCanvas.toDataURL("image/png"));
+  let sigData = historicalData ? historicalData.signature : (isSigEmpty ? null : signatureCanvas.toDataURL("image/png"));
+  if (sigData) sigData = await compressImage(sigData, 400, 0.6);
   if (sigData) {
     try {
       doc.addImage(sigData, "PNG", left + 2, y + 2, 56, 21);
@@ -622,7 +646,7 @@ function exportInspectionPdf(historicalData = null) {
     doc.text(`Page ${p} of ${pages}`, 196, 292, { align: "right" });
   }
 
-  doc.save(`${report.productNumber || "inspection"}-inspection-report.pdf`);
+  doc.save(`${report.poNumber || "inspection"}-inspection-report.pdf`);
 }
 
 finishInspectionButton.addEventListener("click", () => {
