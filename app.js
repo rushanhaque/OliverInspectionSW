@@ -67,6 +67,7 @@ const CHECKLIST_ITEMS = [
 const photoStore = new Map();
 let currentCameraGroupId = null;
 let currentCameraStream = null;
+let cachedCameraStream = null;
 let isOpeningCamera = false;
 let viewerScale = 1;
 
@@ -184,9 +185,10 @@ photoGroups.addEventListener("change", (event) => {
     const groupId = Number(uploadInput.getAttribute("data-photo-upload"));
     Array.from(uploadInput.files).forEach(file => {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
+        const compressed = await compressImage(e.target.result, 1200, 0.7);
         const photos = photoStore.get(groupId) || [];
-        photos.push(e.target.result);
+        photos.push(compressed);
         photoStore.set(groupId, photos);
         renderPhotoList(groupId);
       };
@@ -244,12 +246,22 @@ async function openCameraForGroup(groupId) {
   }
 
   try {
-    stopCamera();
-    let stream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
-    } catch (e) {
-      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    // Reuse cached stream if tracks are still alive
+    let stream = null;
+    if (cachedCameraStream && cachedCameraStream.getTracks().every(t => t.readyState === 'live')) {
+      stream = cachedCameraStream;
+    } else {
+      // Previous stream is dead, clean it up
+      if (cachedCameraStream) {
+        cachedCameraStream.getTracks().forEach(t => t.stop());
+        cachedCameraStream = null;
+      }
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+      } catch (e) {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
+      cachedCameraStream = stream;
     }
     
     currentCameraStream = stream;
@@ -288,24 +300,36 @@ async function openCameraForGroup(groupId) {
 }
 
 function stopCamera() {
-  if (currentCameraStream) {
-    for (const track of currentCameraStream.getTracks()) track.stop();
-  }
-  currentCameraStream = null;
+  // Don't kill the stream tracks — just detach from preview so we can reuse without re-prompting permissions
   currentCameraGroupId = null;
   cameraPreview.srcObject = null;
+  // Keep cachedCameraStream alive
 }
+
+window.addEventListener("beforeunload", () => {
+  if (cachedCameraStream) {
+    cachedCameraStream.getTracks().forEach(t => t.stop());
+    cachedCameraStream = null;
+  }
+});
 
 function captureCurrentFrame() {
   if (!currentCameraStream || currentCameraGroupId === null) return;
-  const width = cameraPreview.videoWidth;
-  const height = cameraPreview.videoHeight;
-  if (!width || !height) return;
-  cameraCanvas.width = width;
-  cameraCanvas.height = height;
+  const vw = cameraPreview.videoWidth;
+  const vh = cameraPreview.videoHeight;
+  if (!vw || !vh) return;
+  // Downscale capture to max 1200px to save memory
+  let cw = vw, ch = vh;
+  const maxCaptureDim = 1200;
+  if (cw > maxCaptureDim || ch > maxCaptureDim) {
+    if (cw > ch) { ch = Math.round(ch * (maxCaptureDim / cw)); cw = maxCaptureDim; }
+    else { cw = Math.round(cw * (maxCaptureDim / ch)); ch = maxCaptureDim; }
+  }
+  cameraCanvas.width = cw;
+  cameraCanvas.height = ch;
   const ctx = cameraCanvas.getContext("2d");
-  ctx.drawImage(cameraPreview, 0, 0, width, height);
-  const dataUrl = cameraCanvas.toDataURL("image/jpeg", 0.86);
+  ctx.drawImage(cameraPreview, 0, 0, cw, ch);
+  const dataUrl = cameraCanvas.toDataURL("image/jpeg", 0.7);
   const photos = photoStore.get(currentCameraGroupId) || [];
   photos.push(dataUrl);
   photoStore.set(currentCameraGroupId, photos);
@@ -606,11 +630,20 @@ async function exportInspectionPdf(historicalData = null) {
       if (!photos.length) { y = ensurePage(doc, y, 8); doc.setTextColor(75, 85, 99); doc.text("No photos attached.", left + 3, y + 4); y += 11; continue; }
       const w = 42; const h = 32; const gap = 3; let col = 0;
       for (const photo of photos) {
-        if (col === 0) y = ensurePage(doc, y, h + 4);
+        // Check page break for EVERY image, not just at col 0
+        const newY = ensurePage(doc, y, h + 4);
+        if (newY !== y) { col = 0; y = newY; } // Page broke — reset to first column
         const x = left + col * (w + gap);
-        doc.setDrawColor(209, 213, 219); doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
-        const compressed = await compressImage(photo, 800, 0.5);
-        doc.addImage(compressed, "JPEG", x, y, w, h);
+        try {
+          doc.setDrawColor(209, 213, 219); doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
+          const compressed = await compressImage(photo, 600, 0.45);
+          doc.addImage(compressed, "JPEG", x, y, w, h);
+        } catch (imgErr) {
+          console.error("Failed to add photo to PDF:", imgErr);
+          // Draw a placeholder so user knows an image was here
+          doc.setFillColor(245, 245, 245); doc.roundedRect(x, y, w, h, 1.2, 1.2, "F");
+          doc.setTextColor(150,150,150); doc.setFontSize(8); doc.text("Image error", x + 8, y + 17);
+        }
         col += 1;
         if (col >= 4) { col = 0; y += h + 4; }
       }

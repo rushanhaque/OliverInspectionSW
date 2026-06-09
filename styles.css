@@ -432,6 +432,16 @@ button {
   .photo-item:hover { transform: scale(1.03); box-shadow: var(--shadow-md); }
 }
 
+/* ── Camera & Dialog selection prevention ── */
+#camera-dialog,
+#camera-dialog * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 /* ── Landscape phones ── */
 @media (max-width: 540px) and (orientation: landscape) {
   .app-header { padding: 8px 14px; }
