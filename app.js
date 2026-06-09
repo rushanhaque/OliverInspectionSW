@@ -507,6 +507,9 @@ function ensurePage(doc, y, h) {
   return 16;
 }
 
+// Single reusable offscreen canvas to prevent memory exhaustion when processing many images
+const _compressCanvas = document.createElement("canvas");
+
 function compressImage(dataUrl, maxDim, quality) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -517,14 +520,16 @@ function compressImage(dataUrl, maxDim, quality) {
         if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
         else { w = Math.round(w * (maxDim / h)); h = maxDim; }
       }
-      const c = document.createElement("canvas");
-      c.width = w;
-      c.height = h;
-      const ctx = c.getContext("2d");
+      _compressCanvas.width = w;
+      _compressCanvas.height = h;
+      const ctx = _compressCanvas.getContext("2d");
+      ctx.clearRect(0, 0, w, h);
       ctx.drawImage(img, 0, 0, w, h);
-      resolve(c.toDataURL("image/jpeg", quality));
+      const result = _compressCanvas.toDataURL("image/jpeg", quality);
+      img.src = ""; // release memory
+      resolve(result);
     };
-    img.onerror = () => resolve(dataUrl);
+    img.onerror = () => { img.src = ""; resolve(dataUrl); };
     img.src = dataUrl;
   });
 }
